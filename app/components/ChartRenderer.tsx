@@ -1,48 +1,66 @@
-// components/ChartRenderer.tsx
-import { BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658'];
-
-export default function ChartRenderer({ type, data }: { type: string; data: { labels: string[]; values: number[] } }) {
-  const chartData = data.labels.map((label, index) => ({
-    name: label,
-    value: data.values[index],
-  }));
-
-  if (type === 'bar') {
-    return (
-      <BarChart width={300} height={200} data={chartData}>
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Bar dataKey="value" fill="#8884d8" />
-      </BarChart>
-    );
-  }
-
-  if (type === 'line') {
-    return (
-      <LineChart width={300} height={200} data={chartData}>
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Line type="monotone" dataKey="value" stroke="#8884d8" />
-      </LineChart>
-    );
-  }
-
-  if (type === 'pie') {
-    return (
-      <PieChart width={300} height={200}>
-        <Pie data={chartData} dataKey="value" nameKey="name" outerRadius={80}>
-          {chartData.map((entry, index) => (
-            <Cell key={index} fill={COLORS[index % COLORS.length]} />
-          ))}
-        </Pie>
-        <Tooltip />
-      </PieChart>
-    );
-  }
-
-  return null;
+interface ChartRendererProps {
+  type: 'bar' | 'line' | 'pie' | 'histogram';
+  data: {
+    labels: string[];
+    values: Record<string, number[]>;
+  };
 }
+
+const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1'];
+
+const ChartRenderer = ({ type, data }: ChartRendererProps) => {
+  const keys = Object.keys(data.values);
+  const chartData = data.labels.map((label, i) => {
+    const point: any = { name: label };
+    keys.forEach((k) => (point[k] = data.values[k][i]));
+    return point;
+  });
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      {type === 'bar' ? (
+        <BarChart data={chartData}>
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          {keys.map((k, i) => (
+            <Bar key={k} dataKey={k} fill={COLORS[i % COLORS.length]} />
+          ))}
+        </BarChart>
+      ) : type === 'line' ? (
+        <LineChart data={chartData}>
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          {keys.map((k, i) => (
+            <Line key={k} type="monotone" dataKey={k} stroke={COLORS[i % COLORS.length]} />
+          ))}
+        </LineChart>
+      ) : (
+        <PieChart>
+          <Tooltip />
+          <Legend />
+          <Pie
+            data={chartData}
+            dataKey={keys[0]}
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            outerRadius={80}
+            label
+          >
+            {chartData.map((_, i) => (
+              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+            ))}
+          </Pie>
+        </PieChart>
+      )}
+    </ResponsiveContainer>
+  );
+};
+
+export default ChartRenderer;
