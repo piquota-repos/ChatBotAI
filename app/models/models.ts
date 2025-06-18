@@ -3,14 +3,16 @@
 export interface ChatMessage {
     role: 'user' | 'bot';
     content: string;
-    chartType?: 'bar' | 'line' | 'pie' | 'histogram';
+    chartType?: 'bar' | 'line' | 'pie' | 'histogram'|'donut'|'bubble';
     data?: ChartData;
 }
 
 export interface ChartData {
-    labels: string[];
-    values: Record<string, number[]>;
+  labels: string[];  // make it required
+  values: Record<string, (number | null)[]>;
+  table?: TableRow[];
 }
+
 
 export interface ApiResponse {
     success: boolean;
@@ -50,5 +52,6 @@ export interface Metadata {
 }
 
 export interface TableRow {
-    [key: string]: string | number;
+  [key: string]: string | number | null;
 }
+
